@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppSpacing {
   static const double xs = 4.0;
@@ -48,26 +47,26 @@ class AppTheme {
         surface: surfaceWhite,
       ),
       scaffoldBackgroundColor: backgroundLight,
-      textTheme: GoogleFonts.outfitTextTheme().apply(
+      textTheme: const TextTheme().apply(
         bodyColor: textPrimary,
         displayColor: textPrimary,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: primaryDark,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.outfit(
+        titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         color: surfaceWhite,
         elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.08),
-        shape: const RoundedRectangleBorder(
+        shadowColor: Colors.black12,
+        shape: RoundedRectangleBorder(
           borderRadius: AppRadius.largeRadius,
           side: BorderSide(color: borderGrey, width: 1),
         ),
@@ -81,7 +80,7 @@ class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.mediumRadius,
           ),
-          textStyle: GoogleFonts.outfit(
+          textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
           ),
@@ -95,40 +94,40 @@ class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.mediumRadius,
           ),
-          textStyle: GoogleFonts.outfit(
+          textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: const InputDecorationTheme(
         filled: true,
         fillColor: surfaceWhite,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: const OutlineInputBorder(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
           borderRadius: AppRadius.mediumRadius,
           borderSide: BorderSide(color: borderGrey),
         ),
-        enabledBorder: const OutlineInputBorder(
+        enabledBorder: OutlineInputBorder(
           borderRadius: AppRadius.mediumRadius,
           borderSide: BorderSide(color: borderGrey),
         ),
-        focusedBorder: const OutlineInputBorder(
+        focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.mediumRadius,
           borderSide: BorderSide(color: accentGold, width: 2),
         ),
-        labelStyle: GoogleFonts.outfit(color: textSecondary, fontSize: 14),
+        labelStyle: TextStyle(color: textSecondary, fontSize: 14),
       ),
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: surfaceWhite,
         selectedColor: accentGold,
         secondarySelectedColor: emeraldGreen,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        shape: const RoundedRectangleBorder(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(
           borderRadius: AppRadius.pillRadius,
           side: BorderSide(color: borderGrey),
         ),
-        labelStyle: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: textPrimary),
+        labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textPrimary),
       ),
       dialogTheme: const DialogThemeData(
         backgroundColor: surfaceWhite,

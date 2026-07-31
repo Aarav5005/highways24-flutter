@@ -46,13 +46,7 @@ class DhabaCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  dhaba.imageUrl.isEmpty
-                      ? _buildBrandedPlaceholder()
-                      : Image.network(
-                          dhaba.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (ctx, err, stack) => _buildBrandedPlaceholder(),
-                        ),
+                  _buildBrandedPlaceholder(),
                   Positioned(
                     top: 8,
                     right: 8,
