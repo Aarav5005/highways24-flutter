@@ -1,18 +1,21 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:highways24_flutter/core/events/event_bus.dart';
+import 'package:highways24_flutter/core/storage/offline_sync_queue.dart';
 import 'package:highways24_flutter/features/dhabas/data/dhaba_repository_impl.dart';
 import 'package:highways24_flutter/features/dhabas/domain/dhaba_search_query.dart';
 import 'package:highways24_flutter/features/orders/data/order_repository_impl.dart';
 import 'package:highways24_flutter/features/orders/domain/cart_service.dart';
 import 'package:highways24_flutter/models/food_order_model.dart';
 import 'package:highways24_flutter/models/menu_item_model.dart';
+import 'package:highways24_flutter/models/trip_model.dart';
 import 'package:highways24_flutter/features/trip/data/trip_repository_impl.dart';
 import 'package:highways24_flutter/features/sos/domain/sos_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('End-to-End Highways24 Driver User Journey Validation', () {
+  group('Happy Path: End-to-End Highways24 Driver User Journey Validation', () {
     test('Complete Driver Workflow: Auth -> Discovery -> Cart Order -> Trip -> SOS', () async {
       // 1. Mock platform channel storage in test environment
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -112,6 +115,60 @@ void main() {
 
       sosService.resolveAlert(sosAlert.id);
       expect(sosService.activeAlerts.first.status.name, equals('resolved'));
+    });
+  });
+
+  group('Failure-Path & Resilience Validation Scenarios', () {
+    test('1. Offline Sync Queue Enqueue & Auto-Recovery on Reconnect', () async {
+      final syncQueue = OfflineSyncQueue();
+
+      // Enqueue offline action when network drops
+      syncQueue.enqueue('PlaceOrder', {'order_id': 'ord_offline_99', 'total_amount': 450.0});
+      expect(syncQueue.totalQueued, equals(1));
+      expect(syncQueue.pendingOperations.first.type, equals('PlaceOrder'));
+      expect(syncQueue.pendingOperations.first.idempotencyKey, contains('idem_'));
+
+      // Simulate network reconnect handler
+      await syncQueue.processQueue((op) async {
+        return true; // Sync success
+      });
+
+      expect(syncQueue.totalCompleted, equals(1));
+      syncQueue.clearCompleted();
+      expect(syncQueue.totalQueued, equals(0));
+    });
+
+    test('2. Trip Engine App Restart Session Resumption', () async {
+      final tripRepo = TripRepositoryImpl();
+      final trip = await tripRepo.getActiveTrip();
+
+      expect(trip, isNotNull);
+      expect(trip!.status, equals(TripStatus.active));
+      expect(trip.waypoints.contains('Neemrana'), isTrue);
+    });
+
+    test('3. EventBus SOS Domain Event Emission', () async {
+      bool eventReceived = false;
+
+      final subscription = EventBus().on<SOSActivatedEvent>().listen((event) {
+        eventReceived = true;
+        expect(event.driverId, equals('usr_driver'));
+      });
+
+      final sosService = SOSService();
+      await sosService.triggerPanicSOS(
+        driverId: 'usr_driver',
+        driverName: 'Rajesh Singh',
+        driverPhone: '+91 98765 43210',
+        locationAddress: 'NH 48 Km 160',
+        latitude: 27.7011,
+        longitude: 76.1200,
+        notifiedContacts: [],
+      );
+
+      await Future.delayed(const Duration(milliseconds: 50));
+      expect(eventReceived, isTrue);
+      await subscription.cancel();
     });
   });
 }
