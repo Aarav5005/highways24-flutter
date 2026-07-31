@@ -7,6 +7,7 @@ enum OperationStatus {
   syncing,
   completed,
   failed,
+  deadLettered,
 }
 
 class PendingOperation {
@@ -34,10 +35,11 @@ class PendingOperation {
     this.status = OperationStatus.pending,
   });
 
-  // Exponential Backoff Delay Calculation (5s, 15s, 30s, 60s, 300s)
+  // Exponential Backoff Delay with Jitter (5s ± jitter ... 300s ± jitter)
   Duration get nextRetryDelay {
-    final backoffSeconds = min(300, 5 * pow(2, retryCount).toInt());
-    return Duration(seconds: backoffSeconds);
+    final baseSeconds = min(300, 5 * pow(2, retryCount).toInt());
+    final jitter = Random().nextInt(5); // 0..4 seconds jitter
+    return Duration(seconds: baseSeconds + jitter);
   }
 
   bool get shouldAttempt {
@@ -69,21 +71,32 @@ class PendingOperation {
 
 class OfflineSyncQueue {
   final List<PendingOperation> _queue = [];
+  final List<PendingOperation> _deadLetterQueue = [];
 
   List<PendingOperation> get pendingOperations =>
       _queue.where((op) => op.shouldAttempt).toList();
 
+  List<PendingOperation> get deadLetterQueue => List.unmodifiable(_deadLetterQueue);
+
   int get totalQueued => _queue.length;
   int get totalCompleted => _queue.where((o) => o.status == OperationStatus.completed).length;
   int get totalFailed => _queue.where((o) => o.status == OperationStatus.failed).length;
+  int get totalDeadLettered => _deadLetterQueue.length;
+
+  static String _generateUuid() {
+    final random = Random.secure();
+    final values = List<int>.generate(16, (i) => random.nextInt(256));
+    values[6] = (values[6] & 0x0f) | 0x40; // version 4
+    values[8] = (values[8] & 0x3f) | 0x80; // variant 10
+    return values.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
 
   void enqueue(String type, Map<String, dynamic> payload) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
     final op = PendingOperation(
-      id: 'op_$timestamp',
+      id: 'op_${_generateUuid().substring(0, 8)}',
       type: type,
-      idempotencyKey: 'idem_$timestamp',
-      correlationId: 'corr_$timestamp',
+      idempotencyKey: 'idem_${_generateUuid()}',
+      correlationId: 'corr_${_generateUuid()}',
       payload: payload,
       createdAt: DateTime.now(),
     );
@@ -110,11 +123,14 @@ class OfflineSyncQueue {
           } else {
             final newRetry = op.retryCount + 1;
             if (newRetry >= 5) {
-              _queue[index] = op.copyWith(
+              final deadLetterOp = op.copyWith(
                 retryCount: newRetry,
-                status: OperationStatus.failed,
-                lastError: 'Max retry limit reached',
+                status: OperationStatus.deadLettered,
+                lastError: 'Max retries exceeded. Moved to Dead Letter Queue.',
               );
+              _queue.removeAt(index);
+              _deadLetterQueue.add(deadLetterOp);
+              AppLogger.warning('Operation moved to Dead Letter Queue: [${op.type}] (${op.idempotencyKey})', 'SYNC');
             } else {
               _queue[index] = op.copyWith(
                 retryCount: newRetry,
