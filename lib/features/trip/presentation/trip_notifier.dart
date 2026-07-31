@@ -1,9 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/presentation/auth_notifier.dart';
 import '../../../models/trip_model.dart';
+import '../data/trip_api.dart';
 import '../domain/trip_repository.dart';
 import '../data/trip_repository_impl.dart';
 
-final tripRepositoryProvider = Provider<TripRepository>((ref) => TripRepositoryImpl());
+final tripApiProvider = Provider((ref) {
+  return TripApi(ref.watch(dioClientProvider));
+});
+
+final tripRepositoryProvider = Provider<TripRepository>((ref) {
+  return TripRepositoryImpl(ref.watch(tripApiProvider));
+});
 
 final activeTripNotifierProvider = StateNotifierProvider<ActiveTripNotifier, TripModel?>((ref) {
   return ActiveTripNotifier(ref.watch(tripRepositoryProvider));
