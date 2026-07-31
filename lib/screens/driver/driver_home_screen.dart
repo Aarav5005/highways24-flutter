@@ -4,6 +4,7 @@ import '../../providers/app_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/dhaba_card.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../core/widgets/smart_intelligence_widgets.dart';
 import 'trip_planner_screen.dart';
 import 'dhaba_detail_screen.dart';
 import 'mechanic_request_screen.dart';
@@ -17,6 +18,16 @@ class DriverHomeScreen extends StatelessWidget {
     final appState = Provider.of<AppState>(context);
     final user = appState.currentUser;
     final activeTrip = appState.activeTrip;
+
+    // SINGLE SMART INSIGHT SELECTION LOGIC
+    String smartInsightText;
+    if (activeTrip != null) {
+      smartInsightText = 'Nearest verified dhaba (Sher-e-Punjab) has 20 truck parking slots available on your route.';
+    } else if (appState.mechanics.isNotEmpty) {
+      smartInsightText = 'Mechanic Gurmeet Automobile Works (2.1 km ahead) is online and available for mobile repair.';
+    } else {
+      smartInsightText = 'Start a trip now to discover top-rated Dhabas with hot food and clean washrooms.';
+    }
 
     return Scaffold(
       body: RefreshIndicator(
@@ -90,7 +101,12 @@ class DriverHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 2. Start Trip / Active Trip Banner
+                    // 2. ⚡ HIGHWAY INTELLIGENCE INSIGHT BANNER (EXACTLY ONE INSIGHT)
+                    SmartInsightBanner(insightText: smartInsightText),
+
+                    const SizedBox(height: 16),
+
+                    // 3. Start Trip / Active Trip Banner
                     if (activeTrip != null) ...[
                       Card(
                         elevation: 4,
@@ -232,9 +248,18 @@ class DriverHomeScreen extends StatelessWidget {
                       ),
                     ],
 
+                    const SizedBox(height: 20),
+
+                    // 4. ☕ FATIGUE INTELLIGENCE SAFETY ALERT CARD
+                    const FatigueAlertCard(
+                      drivingHours: 4,
+                      nextStopKm: 8,
+                      nextStopName: 'Sher-e-Punjab Dhaba Neemrana',
+                    ),
+
                     const SizedBox(height: 24),
 
-                    // 3. Nearby Dhabas Section
+                    // 5. Nearby Dhabas Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -292,7 +317,7 @@ class DriverHomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // 4. Nearby Mechanics Section
+                    // 6. Nearby Mechanics Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -368,7 +393,25 @@ class DriverHomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // 5. Recent Trip Logs Section
+                    // 7. FUEL STATIONS INTELLIGENCE SECTION
+                    const Text(
+                      'Highway Fuel Stations & DEF',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
+                    ),
+                    const SizedBox(height: 10),
+
+                    const FuelStationCard(
+                      stationName: 'IndianOil Swagat Highway Outlet',
+                      highway: 'NH 48 Neemrana Plaza',
+                      distanceKm: 3.5,
+                      hasDiesel: true,
+                      hasDefAdblue: true,
+                      hasAirInflation: true,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 8. Recent Trip Logs Section
                     const Text(
                       'Recent Trip Logs',
                       style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),

@@ -13,11 +13,13 @@ import '../services/api_service.dart';
 class AppState extends ChangeNotifier {
   final ApiService apiService = ApiService();
 
-  // App Localization Preference (Default Hindi: hi)
-  Locale appLocale = const Locale('hi');
+  // App Localization Preference (Default English: en, selectable on first launch & remembered)
+  Locale appLocale = const Locale('en');
+  bool hasUserSelectedLanguage = false;
 
   void setLocale(Locale newLocale) {
     appLocale = newLocale;
+    hasUserSelectedLanguage = true;
     notifyListeners();
   }
 
