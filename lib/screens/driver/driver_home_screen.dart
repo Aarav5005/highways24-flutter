@@ -7,6 +7,7 @@ import '../../core/widgets/status_chip.dart';
 import 'trip_planner_screen.dart';
 import 'dhaba_detail_screen.dart';
 import 'mechanic_request_screen.dart';
+import 'driving_mode_screen.dart';
 
 class DriverHomeScreen extends StatelessWidget {
   const DriverHomeScreen({super.key});
@@ -106,9 +107,9 @@ class DriverHomeScreen extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  StatusChip(label: 'ACTIVE TRIP', color: AppTheme.emeraldGreen),
+                                  StatusChip(label: 'ACTIVE TRIP IN PROGRESS', color: AppTheme.emeraldGreen),
                                   Text(
-                                    'Progress: ${(activeTrip.progressPercentage * 100).round()}%',
+                                    '${(activeTrip.progressPercentage * 100).round()}% Done',
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.primaryNavy),
                                   ),
                                 ],
@@ -123,7 +124,7 @@ class DriverHomeScreen extends StatelessWidget {
                                       activeTrip.origin,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                     ),
                                   ),
                                   const Padding(
@@ -137,7 +138,7 @@ class DriverHomeScreen extends StatelessWidget {
                                       activeTrip.destination,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                     ),
                                   ),
                                 ],
@@ -152,34 +153,25 @@ class DriverHomeScreen extends StatelessWidget {
                                   valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.emeraldGreen),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Covered: ${activeTrip.drivenKm.round()} / ${activeTrip.totalKm.round()} km',
-                                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryNavy,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
-                                  SizedBox(
-                                    height: 48,
-                                    child: ElevatedButton.icon(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppTheme.primaryNavy,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (ctx) => const TripPlannerScreen()),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.navigation, size: 16),
-                                      label: const Text('MANAGE TRIP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                    ),
-                                  ),
-                                ],
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (ctx) => const DrivingModeScreen()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.directions_car, size: 18),
+                                  label: const Text('OPEN DRIVING MODE NAVIGATION', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                                ),
                               ),
                             ],
                           ),
@@ -211,7 +203,7 @@ class DriverHomeScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 6),
                               const Text(
-                                'Start a new trip booking to view nearby verified Dhabas and Mechanics along your route.',
+                                'Start a new trip to search verified Dhabas and Mechanics along your highway route.',
                                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.4),
                               ),
                               const SizedBox(height: 14),
@@ -389,7 +381,7 @@ class DriverHomeScreen extends StatelessWidget {
                           padding: EdgeInsets.all(20),
                           child: Center(
                             child: Text(
-                              'No Past Trips',
+                              'No completed trips yet.',
                               style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                             ),
                           ),
