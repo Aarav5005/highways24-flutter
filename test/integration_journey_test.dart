@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:highways24_flutter/core/events/event_bus.dart';
 import 'package:highways24_flutter/core/storage/offline_sync_queue.dart';
+import 'package:highways24_flutter/features/auth/data/token_storage.dart';
 import 'package:highways24_flutter/features/dhabas/data/dhaba_repository_impl.dart';
 import 'package:highways24_flutter/features/dhabas/domain/dhaba_search_query.dart';
 import 'package:highways24_flutter/features/orders/data/order_repository_impl.dart';
@@ -15,17 +16,20 @@ import 'package:highways24_flutter/features/sos/domain/sos_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+      (methodCall) async => null,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.it_dev.com/flutter_secure_storage'),
+      (methodCall) async => null,
+    );
+  });
+
   group('Happy Path: End-to-End Highways24 Driver User Journey Validation', () {
     test('Complete Driver Workflow: Auth -> Discovery -> Cart Order -> Trip -> SOS', () async {
-      // 1. Mock platform channel storage in test environment
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('plugins.it_dev.com/flutter_secure_storage'),
-        (methodCall) async {
-          return null;
-        },
-      );
-
-      // 2. Dhaba Discovery & Search
+      // 1. Dhaba Discovery & Search
       final dhabaRepo = DhabaRepositoryImpl();
       final nearbyDhabas = await dhabaRepo.getNearbyDhabas();
       expect(nearbyDhabas.isNotEmpty, isTrue);
@@ -36,7 +40,7 @@ void main() {
       expect(searchResults.isNotEmpty, isTrue);
       expect(searchResults.first.name, contains('Sher-e-Punjab'));
 
-      // 3. Menu Item & Cart Calculation Engine
+      // 2. Menu Item & Cart Calculation Engine
       final testMenuItem = MenuItemModel(
         id: 'item_01',
         dhabaId: searchResults.first.id,
@@ -61,7 +65,7 @@ void main() {
       final grandTotal = CartService.calculateFinalAmount(subtotal, taxes);
       expect(grandTotal, equals(378.0));
 
-      // 4. Order Placement Transaction
+      // 3. Order Placement Transaction
       final orderRepo = OrderRepositoryImpl();
       final testOrder = FoodOrderModel(
         id: 'ord_test_101',
@@ -82,7 +86,7 @@ void main() {
       expect(activeOrders.length, equals(1));
       expect(activeOrders.first.id, equals('ord_test_101'));
 
-      // 5. Active Trip Navigation Engine
+      // 4. Active Trip Navigation Engine
       final tripRepo = TripRepositoryImpl();
       await tripRepo.startTrip('Delhi', 'Jaipur', 280.0);
       final activeTrip = await tripRepo.getActiveTrip();
@@ -98,7 +102,7 @@ void main() {
       final finishedTrip = await tripRepo.getActiveTrip();
       expect(finishedTrip, isNull);
 
-      // 6. SOS Emergency Panic Dispatch
+      // 5. SOS Emergency Panic Dispatch
       final sosService = SOSService();
       final sosAlert = await sosService.triggerPanicSOS(
         driverId: 'usr_driver',
@@ -169,6 +173,35 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 50));
       expect(eventReceived, isTrue);
       await subscription.cancel();
+    });
+
+    test('4. Partial Sync Queue Isolation (Op 1 succeeds, Op 2 fails, queue uncorrupted)', () async {
+      final syncQueue = OfflineSyncQueue();
+
+      syncQueue.enqueue('PlaceOrder', {'id': 1});
+      syncQueue.enqueue('StartTrip', {'id': 2});
+
+      int attempted = 0;
+      await syncQueue.processQueue((op) async {
+        attempted++;
+        if (op.type == 'PlaceOrder') return true;
+        return false; // Op 2 fails
+      });
+
+      expect(attempted, equals(2));
+      expect(syncQueue.totalCompleted, equals(1));
+      expect(syncQueue.totalQueued, equals(2)); // Op 2 remains pending for retry
+    });
+
+    test('5. Graceful Recovery on Corrupted / Empty Token Storage', () async {
+      final tokenStorage = TokenStorage();
+
+      // Ensure reading empty storage returns null cleanly without crashing
+      final token = await tokenStorage.getAccessToken();
+      final refresh = await tokenStorage.getRefreshToken();
+
+      expect(token, isNull);
+      expect(refresh, isNull);
     });
   });
 }
