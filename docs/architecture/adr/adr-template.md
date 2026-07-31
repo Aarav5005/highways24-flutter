@@ -5,6 +5,7 @@
 - **Date**: YYYY-MM-DD
 - **Review Date**: YYYY-MM-DD
 - **Deciders**: Principal Architect, Lead Engineers
+- **Tags**: [networking, security, offline, performance, architecture]
 
 ## Context
 Why is this architectural change needed? What problem are we solving?
