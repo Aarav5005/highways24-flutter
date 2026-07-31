@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/user_model.dart';
 import 'phone_login_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
+
+  void _selectRoleAndProceed(BuildContext context, UserRole role) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) => PhoneLoginScreen(initialRole: role),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,99 +21,107 @@ class WelcomeScreen extends StatelessWidget {
       backgroundColor: AppTheme.primaryDark,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Spacer(),
+              const SizedBox(height: 12),
 
-              // Logo & Tagline
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.accentGold,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.add_road, color: AppTheme.primaryDark, size: 48),
+              // Logo & App Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentGold,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.add_road, color: AppTheme.primaryDark, size: 36),
+                  ),
+                  const SizedBox(width: 14),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HIGHWAY SETU',
+                        style: TextStyle(
+                          color: AppTheme.accentGold,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      Text(
+                        'India’s Highway Support Network',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 28),
 
               const Text(
-                'HIGHWAY SETU',
-                style: TextStyle(
-                  color: AppTheme.accentGold,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              const Text(
-                'India’s All-in-One Highway Ecosystem & Support Platform',
+                'Choose Your Account Role',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  height: 1.3,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
-
+              const SizedBox(height: 6),
               const Text(
-                'Trip Navigation • Dhaba Pre-Ordering • Roadside Mobile Mechanics • One-Tap Emergency Panic SOS',
+                'Select how you use Highway Setu on Indian highways:',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 14,
-                  height: 1.5,
+                  fontSize: 13,
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 20),
 
-              // Quick Feature Highlights
-              const _FeatureTile(
-                icon: Icons.local_shipping,
-                title: 'Driver Navigation & Trip Logs',
-                subtitle: 'Track active trips, toll plazas, and earn loyalty points',
-              ),
-              const SizedBox(height: 12),
-              const _FeatureTile(
-                icon: Icons.restaurant,
-                title: 'Dhaba Pre-Order Food',
-                subtitle: 'Order ahead for hot Desi food at highway arrival time',
-              ),
-              const SizedBox(height: 12),
-              const _FeatureTile(
-                icon: Icons.build,
-                title: '24/7 Breakdown Assistance',
-                subtitle: 'Dispatch nearby mobile mechanics for tires, engine, towing',
-              ),
-
-              const SizedBox(height: 32),
-
-              // Get Started Button
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accentGold,
-                    foregroundColor: AppTheme.primaryDark,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+              // Role Onboarding Selection Cards
+              Expanded(
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _RoleOnboardingCard(
+                      title: 'Truck Driver / वाहन चालक',
+                      subtitle: 'Find Verified Dhabas, Order Food & Get 24/7 Breakdown Assistance',
+                      icon: Icons.local_shipping,
+                      color: AppTheme.accentGold,
+                      onTap: () => _selectRoleAndProceed(context, UserRole.driver),
                     ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (ctx) => const PhoneLoginScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'GET STARTED WITH PHONE OTP',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                    const SizedBox(height: 14),
+                    _RoleOnboardingCard(
+                      title: 'Dhaba Owner / ढाबा मालिक',
+                      subtitle: 'Receive Pre-Orders from Highway Drivers & Manage Parking',
+                      icon: Icons.restaurant,
+                      color: AppTheme.emeraldGreen,
+                      onTap: () => _selectRoleAndProceed(context, UserRole.dhaba),
+                    ),
+                    const SizedBox(height: 14),
+                    _RoleOnboardingCard(
+                      title: 'Mechanic / मैकेनिक स्पेशलिस्ट',
+                      subtitle: 'Receive Highway Breakdown Calls & Mobile Repair Requests',
+                      icon: Icons.build,
+                      color: Colors.orange.shade700,
+                      onTap: () => _selectRoleAndProceed(context, UserRole.mechanic),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              const Center(
+                child: Text(
+                  '🔒 Secure Mobile OTP Authentication • No Password Needed',
+                  style: TextStyle(color: Colors.white54, fontSize: 11),
                 ),
               ),
             ],
@@ -114,46 +132,75 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-class _FeatureTile extends StatelessWidget {
-  final IconData icon;
+class _RoleOnboardingCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-  const _FeatureTile({
-    required this.icon,
+  const _RoleOnboardingCard({
     required this.title,
     required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white12,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: AppTheme.accentGold, size: 20),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Card(
+      elevation: 3,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color, width: 2),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
             children: [
-              Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: color, size: 32),
               ),
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white60, fontSize: 11),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -4,7 +4,12 @@ import '../../models/user_model.dart';
 import 'otp_verification_screen.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
-  const PhoneLoginScreen({super.key});
+  final UserRole initialRole;
+
+  const PhoneLoginScreen({
+    super.key,
+    this.initialRole = UserRole.driver,
+  });
 
   @override
   State<PhoneLoginScreen> createState() => _PhoneLoginScreenState();
@@ -12,7 +17,13 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final _phoneController = TextEditingController(text: '9876543210');
-  UserRole _selectedRole = UserRole.driver;
+  late UserRole _selectedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole;
+  }
 
   @override
   void dispose() {
@@ -24,28 +35,28 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Highway Setu Login'),
+        title: Text('${_selectedRole.displayName} Login'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Enter Your Phone Number',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
+            Text(
+              'Login as ${_selectedRole.displayName}',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
             ),
             const SizedBox(height: 6),
             const Text(
-              'We will send a 6-digit SMS OTP code for instant verification.',
+              'Enter your 10-digit mobile number to receive a 6-digit SMS OTP code.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
             ),
 
             const SizedBox(height: 24),
 
-            // Role Selection Cards
+            // Role Switcher Segment
             const Text(
-              'Choose Account Persona Role:',
+              'Account Role:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 10),
@@ -53,8 +64,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _RoleSelectCard(
-                    role: UserRole.driver,
+                  child: _RoleSelectChip(
                     title: 'Driver',
                     icon: Icons.local_shipping,
                     isSelected: _selectedRole == UserRole.driver,
@@ -63,8 +73,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _RoleSelectCard(
-                    role: UserRole.dhaba,
+                  child: _RoleSelectChip(
                     title: 'Dhaba',
                     icon: Icons.restaurant,
                     isSelected: _selectedRole == UserRole.dhaba,
@@ -73,8 +82,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _RoleSelectCard(
-                    role: UserRole.mechanic,
+                  child: _RoleSelectChip(
                     title: 'Mechanic',
                     icon: Icons.build,
                     isSelected: _selectedRole == UserRole.mechanic,
@@ -84,16 +92,21 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // Phone Input Field
             Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: AppTheme.borderGrey),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       decoration: BoxDecoration(
                         color: AppTheme.backgroundLight,
                         borderRadius: BorderRadius.circular(8),
@@ -128,6 +141,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
 
             const SizedBox(height: 32),
 
+            // Primary 48dp+ CTA Button
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -135,6 +149,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentGold,
                   foregroundColor: AppTheme.primaryDark,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
                   final phone = _phoneController.text.trim();
@@ -155,7 +170,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                   }
                 },
                 icon: const Icon(Icons.sms),
-                label: const Text('SEND VERIFICATION OTP', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                label: const Text('SEND VERIFICATION OTP', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -165,15 +180,13 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 }
 
-class _RoleSelectCard extends StatelessWidget {
-  final UserRole role;
+class _RoleSelectChip extends StatelessWidget {
   final String title;
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _RoleSelectCard({
-    required this.role,
+  const _RoleSelectChip({
     required this.title,
     required this.icon,
     required this.isSelected,
@@ -184,12 +197,12 @@ class _RoleSelectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.accentGoldLight : AppTheme.surfaceWhite,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? AppTheme.accentGold : AppTheme.borderGrey,
             width: isSelected ? 2 : 1,
@@ -197,8 +210,8 @@ class _RoleSelectCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? AppTheme.primaryDark : AppTheme.textSecondary, size: 24),
-            const SizedBox(height: 6),
+            Icon(icon, color: isSelected ? AppTheme.primaryDark : AppTheme.textSecondary, size: 22),
+            const SizedBox(height: 4),
             Text(
               title,
               style: TextStyle(
