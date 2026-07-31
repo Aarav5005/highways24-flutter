@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class AppSpacing {
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 24.0;
+  static const double xxl = 32.0;
+}
+
+class AppRadius {
+  static const double small = 8.0;
+  static const double medium = 12.0;
+  static const double large = 16.0;
+  static const double pill = 24.0;
+
+  static const BorderRadius smallRadius = BorderRadius.all(Radius.circular(small));
+  static const BorderRadius mediumRadius = BorderRadius.all(Radius.circular(medium));
+  static const BorderRadius largeRadius = BorderRadius.all(Radius.circular(large));
+  static const BorderRadius pillRadius = BorderRadius.all(Radius.circular(pill));
+}
+
 class AppTheme {
   static const Color primaryDark = Color(0xFF0F172A);
   static const Color primaryNavy = Color(0xFF1E293B);
@@ -46,23 +67,79 @@ class AppTheme {
         color: surfaceWhite,
         elevation: 2,
         shadowColor: Colors.black.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: borderGrey, width: 1),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.largeRadius,
+          side: BorderSide(color: borderGrey, width: 1),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: accentGold,
           foregroundColor: primaryDark,
+          minimumSize: const Size.fromHeight(48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadius.mediumRadius,
           ),
           textStyle: GoogleFonts.outfit(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
           ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primaryDark,
+          minimumSize: const Size.fromHeight(48),
+          side: const BorderSide(color: borderGrey, width: 1.5),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadius.mediumRadius,
+          ),
+          textStyle: GoogleFonts.outfit(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceWhite,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: const OutlineInputBorder(
+          borderRadius: AppRadius.mediumRadius,
+          borderSide: BorderSide(color: borderGrey),
+        ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: AppRadius.mediumRadius,
+          borderSide: BorderSide(color: borderGrey),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: AppRadius.mediumRadius,
+          borderSide: BorderSide(color: accentGold, width: 2),
+        ),
+        labelStyle: GoogleFonts.outfit(color: textSecondary, fontSize: 14),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: surfaceWhite,
+        selectedColor: accentGold,
+        secondarySelectedColor: emeraldGreen,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.pillRadius,
+          side: BorderSide(color: borderGrey),
+        ),
+        labelStyle: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: textPrimary),
+      ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: surfaceWhite,
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.largeRadius),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surfaceWhite,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
     );
