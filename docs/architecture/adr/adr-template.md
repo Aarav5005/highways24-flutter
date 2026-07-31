@@ -7,8 +7,17 @@
 ## Context
 Why is this architectural change needed? What problem are we solving?
 
+## Decision Drivers
+- Primary driver (e.g. Offline reliability)
+- Secondary driver (e.g. Performance / Security)
+- Architectural constraints
+
 ## Decision
 What specific technical change are we making?
+
+## Related ADRs
+- ADR-001 Riverpod
+- ADR-004 Dio Networking
 
 ## Alternatives Considered
 - **Option A**: Description & Trade-offs
