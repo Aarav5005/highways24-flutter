@@ -4,6 +4,7 @@ import '../providers/app_state.dart';
 import '../models/user_model.dart';
 import '../core/widgets/sos_floating_button.dart';
 import '../core/theme/app_theme.dart';
+import '../core/localization/app_localizations.dart';
 import 'driver/driver_home_screen.dart';
 import 'driver/trip_planner_screen.dart';
 import 'driver/mechanic_request_screen.dart';
@@ -33,12 +34,12 @@ class _HomeShellState extends State<HomeShell> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Logout'),
+        title: const Text('Logout / लॉगआउट'),
         content: const Text('Are you sure you want to logout from your account?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Cancel / रद्द करें'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.sosRed, foregroundColor: Colors.white),
@@ -62,6 +63,7 @@ class _HomeShellState extends State<HomeShell> {
     final appState = Provider.of<AppState>(context);
     final user = appState.currentUser;
     final role = user.role;
+    final loc = AppLocalizations(appState.appLocale);
 
     Widget bodyWidget;
     Widget? floatingActionButton;
@@ -116,9 +118,27 @@ class _HomeShellState extends State<HomeShell> {
           ],
         ),
         actions: [
+          // Language Quick Selector Dropdown
+          DropdownButton<String>(
+            value: appState.appLocale.languageCode,
+            dropdownColor: AppTheme.primaryNavy,
+            underline: const SizedBox(),
+            icon: const Icon(Icons.language, color: AppTheme.accentGold, size: 20),
+            items: const [
+              DropdownMenuItem(value: 'hi', child: Text('🇮🇳 हिन्दी', style: TextStyle(color: Colors.white, fontSize: 12))),
+              DropdownMenuItem(value: 'en', child: Text('🇬🇧 Eng', style: TextStyle(color: Colors.white, fontSize: 12))),
+              DropdownMenuItem(value: 'pa', child: Text('🇮🇳 ਪੰਜਾਬੀ', style: TextStyle(color: Colors.white, fontSize: 12))),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                appState.setLocale(Locale(val));
+              }
+            },
+          ),
+          const SizedBox(width: 6),
           Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.only(right: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: AppTheme.accentGold,
               borderRadius: BorderRadius.circular(16),
@@ -150,22 +170,22 @@ class _HomeShellState extends State<HomeShell> {
               selectedItemColor: AppTheme.accentGold,
               unselectedItemColor: Colors.white70,
               backgroundColor: AppTheme.primaryDark,
-              items: const [
+              items: [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
+                  icon: const Icon(Icons.home),
+                  label: loc.tr('home'),
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.alt_route),
-                  label: 'Trip Plan',
+                  icon: const Icon(Icons.alt_route),
+                  label: loc.tr('trip'),
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.build),
-                  label: 'Mechanics',
+                  icon: const Icon(Icons.build),
+                  label: loc.tr('nearby_mechanics').split(' ').last,
                 ),
-                BottomNavigationBarItem(
+                const BottomNavigationBarItem(
                   icon: Icon(Icons.stars),
-                  label: 'Rewards',
+                  label: 'इनाम / Rewards',
                 ),
               ],
             )

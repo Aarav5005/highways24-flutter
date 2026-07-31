@@ -13,6 +13,14 @@ import '../services/api_service.dart';
 class AppState extends ChangeNotifier {
   final ApiService apiService = ApiService();
 
+  // App Localization Preference (Default Hindi: hi)
+  Locale appLocale = const Locale('hi');
+
+  void setLocale(Locale newLocale) {
+    appLocale = newLocale;
+    notifyListeners();
+  }
+
   // Current User & Active Persona Role
   UserModel currentUser = UserModel(
     id: 'usr_001',
