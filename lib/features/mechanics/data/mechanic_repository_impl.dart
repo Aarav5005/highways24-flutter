@@ -1,9 +1,15 @@
-import '../../../models/mechanic_model.dart';
-import '../../../models/mechanic_request_model.dart';
+import '../../../../models/mechanic_model.dart';
+import '../../../../models/mechanic_request_model.dart';
 import '../domain/mechanic_repository.dart';
+import 'mechanic_api.dart';
+import 'dto/mechanic_request_dto.dart';
 
 class MechanicRepositoryImpl implements MechanicRepository {
-  final List<MechanicModel> _mechanics = [
+  final MechanicApi? _mechanicApi;
+
+  MechanicRepositoryImpl([this._mechanicApi]);
+
+  final List<MechanicModel> _mockMechanics = [
     MechanicModel(
       id: 'mech_01',
       name: 'Gurmeet Heavy Truck Repair & Vulcanizing',
@@ -47,15 +53,35 @@ class MechanicRepositoryImpl implements MechanicRepository {
 
   @override
   Future<List<MechanicModel>> getMechanics() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return _mechanics;
+    final api = _mechanicApi;
+    if (api != null) {
+      try {
+        final dtos = await api.getNearbyMechanics();
+        if (dtos.isNotEmpty) {
+          return dtos.map((d) => d.toDomain()).toList();
+        }
+      } catch (_) {
+        // Resilient offline fallback
+      }
+    }
+    await Future.delayed(const Duration(milliseconds: 150));
+    return _mockMechanics;
   }
 
   @override
   Future<MechanicModel?> getMechanicById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 150));
+    final api = _mechanicApi;
+    if (api != null) {
+      try {
+        final dto = await api.getMechanicById(id);
+        return dto.toDomain();
+      } catch (_) {
+        // Resilient offline fallback
+      }
+    }
+    await Future.delayed(const Duration(milliseconds: 100));
     try {
-      return _mechanics.firstWhere((m) => m.id == id);
+      return _mockMechanics.firstWhere((m) => m.id == id);
     } catch (_) {
       return null;
     }
@@ -63,7 +89,16 @@ class MechanicRepositoryImpl implements MechanicRepository {
 
   @override
   Future<void> submitBreakdownRequest(MechanicRequestModel request) async {
-    await Future.delayed(const Duration(milliseconds: 300));
     _requests.insert(0, request);
+
+    final api = _mechanicApi;
+    if (api != null) {
+      try {
+        final dto = MechanicRequestDto.fromDomain(request);
+        await api.submitBreakdownRequest(dto);
+      } catch (_) {
+        // Network error ignored, request recorded locally
+      }
+    }
   }
 }

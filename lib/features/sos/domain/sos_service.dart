@@ -1,8 +1,13 @@
 import '../../../models/sos_alert_model.dart';
 import '../../../core/events/event_bus.dart';
+import '../data/sos_api.dart';
+import '../data/dto/sos_alert_dto.dart';
 
 class SOSService {
+  final SOSApi? _sosApi;
   final List<SOSAlertModel> _activeAlerts = [];
+
+  SOSService([this._sosApi]);
 
   List<SOSAlertModel> get activeAlerts => List.unmodifiable(_activeAlerts);
 
@@ -15,8 +20,6 @@ class SOSService {
     required double longitude,
     required List<String> notifiedContacts,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-
     final sosAlert = SOSAlertModel(
       id: 'sos_${DateTime.now().millisecondsSinceEpoch}',
       driverId: driverId,
@@ -42,6 +45,28 @@ class SOSService {
       ),
     );
 
+    final api = _sosApi;
+    if (api != null) {
+      try {
+        final dto = SOSAlertDto(
+          id: sosAlert.id,
+          driverId: sosAlert.driverId,
+          driverName: sosAlert.driverName,
+          driverPhone: sosAlert.driverPhone,
+          locationAddress: sosAlert.locationAddress,
+          latitude: sosAlert.latitude,
+          longitude: sosAlert.longitude,
+          timestamp: sosAlert.timestamp.toIso8601String(),
+          status: 'active',
+          notifiedContacts: sosAlert.notifiedContacts,
+        );
+        final resDto = await api.triggerSOS(dto);
+        return resDto.toDomain();
+      } catch (_) {
+        // Resilient fallback to local active alert
+      }
+    }
+
     return sosAlert;
   }
 
@@ -49,6 +74,15 @@ class SOSService {
     final index = _activeAlerts.indexWhere((s) => s.id == sosId);
     if (index >= 0) {
       _activeAlerts[index] = _activeAlerts[index].copyWith(status: SOSAlertStatus.resolved);
+    }
+
+    final api = _sosApi;
+    if (api != null) {
+      try {
+        api.resolveSOS(sosId);
+      } catch (_) {
+        // Ignore network error on resolve
+      }
     }
   }
 }

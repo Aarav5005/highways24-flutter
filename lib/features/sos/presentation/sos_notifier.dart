@@ -1,8 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/presentation/auth_notifier.dart';
 import '../../../models/sos_alert_model.dart';
+import '../data/sos_api.dart';
 import '../domain/sos_service.dart';
 
-final sosServiceProvider = Provider<SOSService>((ref) => SOSService());
+final sosApiProvider = Provider((ref) {
+  return SOSApi(ref.watch(dioClientProvider));
+});
+
+final sosServiceProvider = Provider<SOSService>((ref) {
+  return SOSService(ref.watch(sosApiProvider));
+});
 
 final sosNotifierProvider = StateNotifierProvider<SOSNotifier, List<SOSAlertModel>>((ref) {
   return SOSNotifier(ref.watch(sosServiceProvider));
