@@ -12,6 +12,27 @@ class DhabaCard extends StatelessWidget {
     required this.onTap,
   });
 
+  Widget _buildBrandedPlaceholder() {
+    return Container(
+      color: AppTheme.primaryDark,
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.storefront, color: AppTheme.accentGold, size: 36),
+          SizedBox(height: 4),
+          Text(
+            'HIGHWAY SETU',
+            style: TextStyle(color: AppTheme.accentGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          ),
+          Text(
+            'VERIFIED DHABA',
+            style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -25,16 +46,13 @@ class DhabaCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Container(
-                    color: AppTheme.primaryNavy,
-                    child: Image.network(
-                      dhaba.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, stack) => const Center(
-                        child: Icon(Icons.restaurant, color: Colors.white54, size: 36),
-                      ),
-                    ),
-                  ),
+                  dhaba.imageUrl.isEmpty
+                      ? _buildBrandedPlaceholder()
+                      : Image.network(
+                          dhaba.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, err, stack) => _buildBrandedPlaceholder(),
+                        ),
                   Positioned(
                     top: 8,
                     right: 8,
@@ -63,7 +81,7 @@ class DhabaCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
+                        color: Colors.black.withValues(alpha: 0.75),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
