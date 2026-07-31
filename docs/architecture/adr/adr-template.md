@@ -1,7 +1,9 @@
 # ADR-00X: <Title>
 
 - **Status**: Proposed | Accepted | Superseded
+- **Implementation Status**: Not Started | In Progress | Complete
 - **Date**: YYYY-MM-DD
+- **Review Date**: YYYY-MM-DD
 - **Deciders**: Principal Architect, Lead Engineers
 
 ## Context
