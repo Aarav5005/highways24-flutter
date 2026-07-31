@@ -28,7 +28,6 @@ What specific technical change are we making?
 ## Consequences
 ### Positive
 -
-
 ### Negative
 -
 
@@ -37,3 +36,8 @@ Step-by-step rollout plan.
 
 ## Rollback Strategy
 How to revert if issues occur in production.
+
+## Decision Outcome (Post-Production Review)
+- Observed production results
+- Metrics collected
+- Follow-up actions
