@@ -1,11 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/presentation/auth_notifier.dart';
+import '../../../core/storage/offline_sync_queue.dart';
 import '../../../models/menu_item_model.dart';
 import '../../../models/food_order_model.dart';
 import '../domain/cart_service.dart';
 import '../domain/order_repository.dart';
+import '../data/order_api.dart';
 import '../data/order_repository_impl.dart';
 
-final orderRepositoryProvider = Provider<OrderRepository>((ref) => OrderRepositoryImpl());
+final offlineSyncQueueProvider = Provider((ref) => OfflineSyncQueue());
+
+final orderApiProvider = Provider((ref) {
+  return OrderApi(ref.watch(dioClientProvider));
+});
+
+final orderRepositoryProvider = Provider<OrderRepository>((ref) {
+  return OrderRepositoryImpl(
+    ref.watch(orderApiProvider),
+    ref.watch(offlineSyncQueueProvider),
+  );
+});
 
 final cartNotifierProvider = StateNotifierProvider<CartNotifier, List<OrderCartItem>>((ref) {
   return CartNotifier(ref.watch(orderRepositoryProvider));
